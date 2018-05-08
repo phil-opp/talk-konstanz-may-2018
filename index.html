@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>The Rust Way of OS Development</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,800,700,300,300italic,600,400italic,600italic,700italic,800italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: "Open Sans", sans-serif;
+      }
+
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code {
+        font-family: 'Ubuntu Mono';
+      }
+      .remark-code {
+        font-size: 20px;
+        line-height: 150%;
+      }
+      .remark-slide-content {
+        font-size: 25px;
+        padding: 0em 2em 0em 2em;
+      }
+      .grey {
+        color: grey;
+      }
+      .grey a {
+        color: grey;
+      }
+      .small {
+        font-size: 60%;
+      }
+      .smaller {
+        font-size: 50%;
+      }
+      ul {
+        line-height: 150%;
+      }
+      li ul {
+        font-size: 90%;
+      }
+      h2 {
+        margin-bottom: -20px;
+      }
+      img {
+        margin-top: 1rem;
+        max-width: 100%;
+        max-height: 32rem;
+      }
+      .horizontal-space {
+        margin-left: 1em;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border-top: 2px solid black;
+        border-bottom: 2px solid black;
+      }
+      th {
+        text-align: center;
+        border-bottom: 1px solid black;
+        padding-top: .5em;
+        padding-bottom: .5em;
+      }
+      th:first-child {
+        text-align: left;
+      }
+      td {
+        text-align: center;
+      }
+      td:first-child {
+        text-align: left;
+      }
+      pre {
+        text-align: left;
+      }
+      td pre {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      .remark-notes-current-area {
+        font-size: 1.5em;
+      }
+      .remark-slide-number {
+        font-size: 0.6em;
+      }
+      #slide-title .remark-slide-number {
+        display: none;
+      }
+      .small-slide {
+        font-size: 25px;
+      }
+      .small-slide p {
+        -webkit-margin-before: 0.5em;
+        -webkit-margin-after: 0.5em;
+      }
+      @page {
+        size: 1210px 681px;
+        margin: 0;
+      }
+
+      @media print {
+        .remark-slide-scaler {
+          width: 100% !important;
+          height: 100% !important;
+          transform: scale(1) !important;
+          top: 0 !important;
+          left: 0 !important;
+        }
+      }
+
+      .rust-means {
+        display: block;
+        position: absolute;
+        text-align: left;
+        margin-left: 2rem;
+        margin-top: -4rem;
+        color: grey;
+      }
+    </style>
+  </head>
+  <body onload="init_graphs()">
+    <script src="remark-latest.min.js" type="text/javascript">
+    </script>
+    <script src="Chart.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create({
+        sourceUrl: 'content/index.md',
+        countIncrementalSlides: false,
+        highlightSpans: true,
+        slideNumberFormat: '%current%',
+      });
+    </script>
+
+    <script>
+      function init_graphs() {
+        var ctx = document.getElementById("linux-vulns").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ["2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017"],
+                datasets: [{
+                    label: '# of Buffer Overflow CVEs',
+                    data: [17, 22, 16, 21, 25, 41, 21, 15, 38, 51],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero:true
+                        }
+                    }]
+                },
+                legend: {
+                    labels: {
+                        fontSize: 16
+                    }
+                }
+            }
+        });
+
+        var ctx = document.getElementById("linux-vulns-2018").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ["Buffer Overflow", "Use After Free", "Double Free", "Race Condition", "Required Mutex Not Used", "Integer Overflow", "Other"],
+                datasets: [{
+                    label: '# of CVEs',
+                    data: [9, 6, 2, 5, 1, 2, 24],
+                    borderWidth: 2,
+                    backgroundColor: ["red", "orange", "yellow", "blue", "green", "grey"]
+                }],
+            },
+            options: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        fontSize: 16
+                    }
+                }
+            }
+        });
+      }
+    </script>
+  </body>
+</html>
