@@ -82,6 +82,129 @@ In C:
 .grey[.smaller[Source: https://www.cvedetails.com/vulnerability-list/vendor_id-33/product_id-47/year-2018/Linux-Linux-Kernel.html]]
 
 ---
+# Memory Safety: A Strict Compiler
+
+- It can take some time until your program compiles
+    - “Fighting the borrow checker”
+- Lifetimes can be complicated
+    - “error: `x` does not live long enough”
+
+
+However:
+- “If it compiles, it usually works”
+- Far less debugging
+    - No data races!
+- Refactoring is safe and painless
+
+--
+
+<div style="height:1rem"></div>
+
+What about `unsafe`?
+
+---
+
+class: center, middle
+
+.rust-means[Rust means…]
+
+# Encapsulating Unsafety
+
+---
+
+# Encapsulating Unsafety
+
+- Sometimes you need `unsafe` in a kernel
+    - Writing to the VGA text buffer at `0xb8000`
+    - Modifying CPU configuration registers
+    - Switching the address space (reloading `CR3`)
+- Goal: Provide safe abstractions that encapsulate unsafety
+
+
+Example:
+
+```rust
+/// Invalidate the TLB completely by reloading the CR3 register.
+pub fn flush_tlb() { // safe interface
+    use registers::control::Cr3;
+    let (frame, flags) = Cr3::read();
+    unsafe { Cr3::write(frame, flags) }
+}
+```
+
+⇒ Function can't be used in an `unsafe` way
+
+---
+# Encapsulating Unsafety
+
+Not possible in all cases:
+
+```rust
+/// Write a new root table address into the CR3 register.
+pub fn write_cr3(page_table_frame: PhysFrame, flags: Cr3Flags) {
+    let addr = page_table_frame.start_address();
+    let value = addr.as_u64() | flags.bits();
+    unsafe { asm!("mov $0, %cr3" :: "r" (value) : "memory"); }
+}
+```
+
+--
+
+**Problem**: Passing an invalid `PhysFrame` could break memory safety!
+
+- A frame that is no page table
+- A page table that maps all pages to the same frame
+- A page table that maps two random pages to the same frame
+
+---
+count: false
+
+# Encapsulating Unsafety
+
+Not possible in all cases:
+
+```rust
+/// Write a new root table address into the CR3 register.
+pub `unsafe` fn write_cr3(page_table_frame: PhysFrame, flags: Cr3Flags) {
+    let addr = page_table_frame.start_address();
+    let value = addr.as_u64() | flags.bits();
+    asm!("mov $0, %cr3" :: "r" (value) : "memory");
+}
+```
+
+**Problem**: Passing an invalid `PhysFrame` could break memory safety!
+
+- A frame that is no page table
+- A page table that maps all pages to the same frame
+- A page table that maps two random pages to the same frame
+
+⇒ Function needs to be .mark[`unsafe`] because it depends on valid input
+
+---
+class: extra-spacing
+
+# Encapsulating Unsafety
+
+Edge Cases: Functions that…
+
+- … disable paging?
+--
+<span style="margin-left:3rem;"></span> `unsafe`
+- … disable CPU interrupts?
+--
+<span style="margin-left:3rem;"></span> `safe`
+- … might cause CPU exceptions?
+--
+<span style="margin-left:3rem;"></span> `safe`
+- … can be only called from privileged mode?
+--
+<span style="margin-left:3rem;"></span> `safe`
+- … assume certain things about the hardware? <span style="margin-left:3rem;"></span> .hidden[`depends`]
+    - E.g. there is a VGA text buffer at `0xb8000`
+--
+class: no-hide
+
+---
 class: center, middle
 
 .rust-means[Rust means…]
@@ -192,24 +315,62 @@ Allows to:
 
 Everything happens at compile time ⇒ _No run-time cost!_
 
-<div style="height:1rem"></div>
+---
+class: center, middle
 
-.grey[Bonus: Refactoring is safe and painless]
+.rust-means[Rust means…]
+
+# Easy Dependency Management
+
+---
+# Easy Dependency Management
+
+.float-right[![Cargo logo](content/images/cargo-logo.png)]
+
+- Over 15000 crates on **crates.io**
+- Simply specify the desired version
+    - Add single line to `Cargo.toml`
+- Cargo takes care of the rest
+
+It works the same for OS kernels:
+
+- Over 350 crates in the `no_std` category
+    - Many more can be trivially made `no_std`
+- Dependencies of the Redox kernel:
+ - `bitflags`: .grey[A macro for generating structures with single-bit flags.]
+ - `linked_list_allocator`: .grey[A simple memory allocator.]
+ - `spin`: .grey[Spinning synchronization primitives such as spinlocks.]
+ - `x86`: .grey[Structures, registers, and instructions specific to `x86` CPUs.]
+ - etc.
 
 ---
 
-thread safety
+class: center, middle
 
+.rust-means[Rust means…]
 
+# Great Tooling
 ---
-sicherere Abstraktionen für unsafe operations
 
+class: center, middle
 
+.rust-means[Rust means…]
+
+# An Awesome Community
 ---
-crates.io dependencies
+# An Awesome Community
 
----
 freundliche und nicht-elitäre community
 
 ---
-gute cross-platform tools,
+
+class: center, middle
+
+.rust-means[Rust means…]
+
+# Exciting New Features
+---
+# Exciting New Features
+
+Futures, async/await
+webassembly
