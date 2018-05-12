@@ -332,6 +332,8 @@ class: center, middle
     - Add single line to `Cargo.toml`
 - Cargo takes care of the rest
 
+--
+
 It works the same for OS kernels:
 
 - Over 350 crates in the `no_std` category
@@ -350,6 +352,174 @@ class: center, middle
 .rust-means[Rust means…]
 
 # Great Tooling
+
+---
+
+# Great Tooling
+
+- **rustup**: Use multiple Rust versions for different directories
+- **cargo**: Automatically download, build, and link dependencies
+- **rustfmt**: Format Rust code according to style guidelines
+--
+
+- **Rust Playground**: Run and share code snippets in your browser
+
+![Rust Playground screenshot](content/images/playground.png)
+
+---
+
+# Great Tooling
+
+- **clippy**: Additional warnings for dangerous or unidiomatic code
+
+```rust
+fn equal(x: f32, y: f32) -> bool {
+    if x == y { true } else { false }
+}
+```
+--
+
+```
+error: strict comparison of f32 or f64
+ --> src/main.rs:2:8
+  |
+2 | if x == y { true } else { false }
+  |    ^^^^^^ help: consider comparing them within some error: (x - y).abs() < err
+
+warning: this if-then-else expression returns a bool literal
+ --> src/main.rs:2:5
+  |
+2 | if x == y { true } else { false }
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: you can reduce it to: x == y
+```
+
+---
+
+# Great Tooling
+
+- **bors**: Test merges of pull requests before pushing them
+    - Ensure that master branch is always green
+
+<table>
+    <thead><tr><th width="50%" style="text-align: center">Without bors</th><th width="50%">With bors</th></tr></thead>
+    <tbody>
+        <tr>
+            <td style="padding:1rem">
+                <img src="content/images/without-bors.svg">
+            </td><td style="padding:1rem">
+                <img src="content/images/with-bors.svg">
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div style="height:2rem"></div>
+
+.grey[.small[See https://bors.tech/essay/2017/02/02/pitch/]]
+
+---
+
+# Great Tooling
+
+- **proptest**: A property testing framework
+
+```rust
+fn parse_date(s: &str) -> Option<(u32, u32, u32)> {
+    // […] check if valid YYYY-MM-DD format
+    let year = &s[0..4];
+    let month = &s[`6`..7]; // BUG: should be 5..7
+    let day = &s[8..10];
+    convert_to_u32(year, month, date)
+}
+proptest! {
+    #[test]
+    fn parse_date(y in 0u32..10000, m in 1u32..13, d in 1u32..32) {
+        let (y2, m2, d2) = parse_date(
+            &format!("{:04}-{:02}-{:02}", y, m, d)).unwrap();
+        prop_assert_eq!((y, m, d), (y2, m2, d2));
+    }
+}
+```
+
+---
+
+<pre style="margin-left: 2rem;"><code style="line-height: 0.9; font-size: 20px;">
+- try random values                     y = 2497, m = 8, d = 27     passes
+    |                                   y = 9641, m = 8, d = 18     passes
+    | (failed test case found)          `y = 7360, m = 12, d = 20`    fails
+
+- reduce y to find simpler case         y = 3680, m = 12, d = 20    fails
+    |                                   y = 1840, m = 12, d = 20    fails
+    |                                   y = 920, m = 12, d = 20     fails
+    |                                   y = 460, m = 12, d = 20     fails
+    |                                   y = 230, m = 12, d = 20     fails
+    |                                   y = 115, m = 12, d = 20     fails
+    |                                   y = 57, m = 12, d = 20      fails
+    |                                   y = 28, m = 12, d = 20      fails
+    |                                   y = 14, m = 12, d = 20      fails
+    |                                   y = 7, m = 12, d = 20       fails
+    |                                   y = 3, m = 12, d = 20       fails
+    |                                   y = 1, m = 12, d = 20       fails
+    | (simplest y case still fails)     `y = 0, m = 12, d = 20`       fails
+
+- reduce m to find simpler case         y = 0, m = 6, d = 20        passes
+    |                                   y = 0, m = 9, d = 20        passes
+    |                                   y = 0, m = 11, d = 20       fails
+    | (minimum failure value found)     `y = 0, m = 10, d = 20`       fails
+
+- reduce d to find simpler case         y = 0, m = 10, d = 10       fails
+    |                                   y = 0, m = 10, d = 5        fails
+    |                                   y = 0, m = 10, d = 3        fails
+    |                                   y = 0, m = 10, d = 2        fails
+    | (reduced test case found)         `y = 0, m = 10, d = 1`        fails
+</code></pre>
+
+.grey[.small[See <https://github.com/altsysrq/proptest>]]
+
+---
+
+# Great Tooling for OS Development
+
+In C:
+
+- First step is to build a **cross compiler**
+    - A `gcc` that compiles for your target system
+    - Lots of build dependencies
+- On Windows, you have to use **cygwin**
+    - Required for using the GNU build tools <span class="grey">(e.g. `make`)</span>
+    - The _Windows Subsystem for Linux_ might also work
+
+In Rust:
+
+- Rust works natively on Linux, Windows, and macOS
+- The Rust compiler `rustc` is already a cross-compiler
+- For linking, we can use the cross-platform **`lld`** linker
+    - By the LLVM project
+
+---
+
+# Great Tooling for OS Development
+
+**bootimage**: Create a bootable disk image from a Rust kernel
+
+- Cross-platform, no C dependencies
+- Automatically downloads and compiles a bootloader
+- **bootloader**: A x86 bootloader written in Rust and inline assembly
+- **cargo-xbuild**: Automatically cross compile the `core` library
+.grey[    - Fork of `xargo`, which is in maintainance mode]
+
+**Goals**:
+
+- Make building your kernel as easy as possible
+- Let beginners dive immediately into OS programming
+    - Without an hours-long toolchain setup
+- Remove platform-specific differences
+    - You shouldn't need Linux to do OS development
+
+<div style="height:1rem"></div>
+
+.grey[.small[See https://os.phil-opp.com/news/2018-03-09-pure-rust/]]
+
 ---
 
 class: center, middle
@@ -360,7 +530,33 @@ class: center, middle
 ---
 # An Awesome Community
 
-freundliche und nicht-elitäre community
+- torvalds rant
+- only positive comments
+
+
+---
+class: center, middle
+
+.rust-means[Rust means…]
+
+# No Elitism
+
+---
+
+# No Elitism
+
+> “A **decade of programming**, including a few years of low-level coding in assembly language and/or a systems language such as C, is **pretty much the minimum necessary** to even understand the topic well enough to work in it.”
+
+.right[.grey[From [**wiki.osdev.org**/Beginner_Mistakes](https://wiki.osdev.org/Beginner_Mistakes)]]
+
+**_vs._**
+
+> The book assumes that you have programmed in some language before, but not any particular one. In fact, **people who have not done low-level programming before are a specific target of this book**.
+
+.right[.grey[From [**intermezzos.org**/book](http://intermezzos.github.io/book/second-edition/)]]
+
+---
+blog_os
 
 ---
 
