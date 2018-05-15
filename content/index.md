@@ -512,7 +512,7 @@ In Rust:
 
 - Make building your kernel as easy as possible
 - Let beginners dive immediately into OS programming
-    - Without an hours-long toolchain setup
+    - No hours-long toolchain setup
 - Remove platform-specific differences
     - You shouldn't need Linux to do OS development
 
@@ -532,7 +532,7 @@ class: center, middle
 
 - torvalds rant
 - only positive comments
-
+- Awesome developers: Redox
 
 ---
 class: center, middle
@@ -568,5 +568,358 @@ class: center, middle
 ---
 # Exciting New Features
 
-Futures, async/await
-webassembly
+- Futures
+- Async / await
+- webassembly?
+
+---
+
+# Futures
+
+Result of an asynchronous computation:
+
+``` rust
+trait Future {
+    type Item;
+    type Error;
+    fn poll(&mut self, cx: &mut Context) -> Result<Async<Self::Item>,
+                                                   Self::Error>;
+}
+
+enum Async<T> {
+    Ready(T),
+    Pending,
+}
+```
+
+- Instead of blocking, `Async::Pending` is returned
+- Zero cost abstraction
+
+---
+
+# Futures: Implementation Details
+
+- Futures do nothing until polled
+- An `Executor` is used for polling multiple futures until completion
+    - Like a scheduler
+- If future is not ready when polled, a `Waker` is created
+    - Notifies the `Executor` when the future becomes ready
+    - Avoids continuous polling
+
+
+**Combinators**
+
+- Transform a future without polling it .grey[(similar to iterators)]
+- Examples
+    - `future.map(|v| v + 1)`<span class="grey">: Applies a function to the result</span>
+    - `future_a.join(future_b)`<span class="grey">: Wait for both futures</span>
+    - `future.and_then(|v| some_future(v))`<span class="grey">: Chain dependent futures</span>
+---
+
+# Async / Await
+
+Traditional synchronous code:
+
+```rust
+fn get_user_from_database(user_id: u64) -> Result<User> {…}
+
+fn handle_request(request: Request) -> Result<Response> {
+    let user = get_user_from_database(request.user_id)?;
+    generate_response(user)
+}
+```
+
+- Thread blocked until database read finished
+    - Complete thread stack unusable
+- Number of threads limits number of concurrent requests
+
+---
+
+# Async / Await
+Asynchronous variant:
+
+```rust
+​`async` fn get_user_from_database(user_id: u64) -> Result<User> {…}
+
+​`async` fn handle_request(request: Request) -> Result<Response> {
+    let user = `await!`(get_user_from_database(request.user_id))?;
+    generate_response(user)
+}
+```
+
+- Async functions return `Future<Item=T>` instead of `T`
+- No blocking occurs
+    - It only _looks_ blocking
+    - Stack can be reused for handling other requests
+- Thousands of concurrent requests possible
+
+How does `await` work?
+
+---
+
+# Async / Await: Generators
+
+- Functions that can suspend themselves via `yield`:
+
+```rust
+fn main() {
+    let mut generator = || {
+        println!("2");
+        `yield`;
+        println!("4");
+    };
+
+    println!("1");
+    unsafe { generator.resume() };
+    println!("3");
+    unsafe { generator.resume() };
+    println!("5");
+}
+```
+
+--
+
+- Compiled as state machines
+
+---
+
+```rust
+let mut generator = {
+    `enum Generator { Start, Yield1, Done, }`
+
+    impl Generator {
+        unsafe fn resume(&mut self) {
+            match self {
+                `Generator::Start` => {
+                    println!("2");
+                    *self = Generator::Yield1;
+                }
+                `Generator::Yield1` => {
+                    println!("4");
+                    *self = Generator::Done;
+                }
+                `Generator::Done` => panic!("generator resumed after completion")
+            }
+        }
+    }
+    Generator::Start
+};
+```
+
+---
+
+# Async / Await: Generators
+
+- Generators can keep state:
+
+```rust
+fn main() {
+    let mut generator = || {
+        `let number = 42;`
+        `let ret = "foo";`
+
+        yield number; // yield can return values
+        return ret
+    };
+
+    unsafe { generator.resume() };
+    unsafe { generator.resume() };
+}
+```
+
+Where are `number` and `ret` stored between `resume` calls?
+
+---
+
+```rust
+let mut generator = {
+    enum Generator {
+        Start(`i32, &'static str`),
+        Yield1(`&'static str`),
+        Done,
+    }
+    impl Generator {
+        unsafe fn resume(&mut self) -> GeneratorState<i32, &'static str> {
+            match self {
+                Generator::Start(`i, s`) => {
+                    *self = Generator::Yield1(s); GeneratorState::`Yielded(i)`
+                }
+                Generator::Yield1(`s`) => {
+                    *self = Generator::Done; GeneratorState::`Complete(s)`
+                }
+                Generator::Done => panic!("generator resumed after completion")
+            }
+        }
+    }
+    Generator::Start(ret)
+};
+```
+
+---
+
+# Async / Await: Generators
+
+- Why is `resume` unsafe?
+
+<table style="border: none; margin-top: -2rem; margin-bottom: -2rem;">
+    <tbody>
+        <tr style="vertical-align: top;">
+            <td>
+<pre><code class="Rust">fn main() {
+    let mut generator = move || {
+        let foo = 42;
+        `let bar = &foo;`
+        yield;
+        return bar
+    };
+    unsafe { generator.resume() };
+    `let heap_generator = Box::new(generator);`
+    unsafe { heap_generator.resume() };
+}</pre></code>
+            </td><td style="text-align: left;">
+<pre><code class="Rust">enum Generator {
+    Start,
+    Yield1(i32, &i32),
+    Done,
+}
+</pre></code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+--
+
+- Generator contains reference to itself
+    - No longer valid when moved to the heap ⇒ undefined behavior
+    - Must not be moved after first `resume`
+---
+
+# Async / Await: Implementation
+
+```rust
+async fn handle_request(request: Request) -> Result<Response> {
+    let future = get_user_from_database(request.user_id);
+    let user = `await!`(future)?;
+    generate_response(user)
+}
+```
+
+Compiles roughly to:
+
+```rust
+async fn handle_request(request: Request) -> Result<Response> { `GenFuture`(|| {
+    let future = get_user_from_database(request.user_id);
+    let user = loop { match `future.poll()` {
+        Ok(Async::Ready(u)) => break Ok(u),
+        Ok(Async::NotReady) => `yield`,
+        Err(e) => break Err(e),
+    }}?;
+    generate_response(user)
+})}
+```
+
+---
+
+# Async / Await: Implementation
+
+Transform Generator into Future:
+
+```rust
+struct GenFuture<T>(T);
+
+impl<T: Generator> Future for GenFuture<T> {
+    fn poll(&mut self) -> Poll<T::Item, T::Error> {
+        match unsafe { self.0.resume() } {
+            GeneratorStatus::Complete(Ok(result)) => Ok(Async::Ready(result)),
+            GeneratorStatus::Complete(Err(e)) => Err(e),
+            GeneratorStatus::Yielded => Ok(Async::NotReady),
+        }
+    }
+}
+```
+
+
+---
+
+# Async / Await: For OS Dev?
+
+
+
+
+---
+
+# Summary
+
+Rust means:
+
+- **Memory Safety**
+- **Encapsulating Unsafety**
+- **High Level Code**.grey[ &nbsp;&nbsp;&nbsp;Mutexes, Page Table Abstractions]
+
+
+- **Easy Dependency Management**.grey[ &nbsp;&nbsp;&nbsp;cargo, crates.io]
+- **Great Tooling**.grey[ &nbsp;&nbsp;&nbsp;clippy, bors, proptest, bootimage]
+
+
+- **An Awesome Community**
+- **No Elitism**
+
+
+- **Exciting New Features**.grey[ &nbsp;&nbsp;&nbsp;Futures, Async / Await]
+
+---
+class: black-background
+count: false
+
+---
+class: center, middle
+
+# Extra Slides
+
+---
+
+# Await: Just Syntactic Sugar?
+
+Is `await` just syntactic sugar for the `and_then` combinator?
+
+```rust
+async fn handle_request(request: Request) -> Result<Response> {
+    let user = `await!`(get_user_from_database(request.user_id))?;
+    generate_response(user)
+}
+```
+
+```rust
+async fn handle_request(request: Request) -> Result<Response> {
+    get_user_from_database(request.user_id).`and_then`(|user| {
+        generate_response(user)
+    })
+}
+```
+
+In this case, both variants work.
+
+---
+
+# Await: Not Just Syntactic Sugar!
+
+```rust
+fn read_info_buf(socket: &mut Socket) -> [u8; 1024]
+    -> impl Future<Item = [0; 1024], Error = io::Error> + `'static`
+{
+    let mut buf = [0; 1024];
+    let mut cursor = 0;
+
+    `while` cursor < 1024 {
+        cursor += await!(socket.read(`&mut buf`[cursor..]))?;
+    };
+    buf
+}
+```
+
+- We don't know how many `and_then` we need
+    - But each one is their own type -> boxed trait objects required
+- `buf` is a local stack variable, but the returned future is `'static`
+    - Not possible with `and_then`
+    - _Pinned types_ allow it for `await`
