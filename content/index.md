@@ -8,6 +8,20 @@ count: false
 Notes for the _first_ slide!
 
 ---
+
+# About Me
+
+- Computer science student at KIT .grey[(Karlsruhe)]
+- Rust user since 2014
+
+
+--
+
+- _“Writing an OS in Rust”_ blog series
+
+!["Writing an OS in Rust" screenshot](content/images/writing-an-os-in-rust.png)
+
+---
 <img src="content/images/rust-logo-blk.svg" alt="Rust logo" width="300rem" height="auto" style="float: right; margin-top: -2rem; margin-right: -2rem;">
 
 # Rust
