@@ -22,14 +22,55 @@ Notes for the _first_ slide!
 !["Writing an OS in Rust" screenshot](content/images/writing-an-os-in-rust.png)
 
 ---
-<img src="content/images/rust-logo-blk.svg" alt="Rust logo" width="300rem" height="auto" style="float: right; margin-top: -2rem; margin-right: -2rem;">
+<img src="content/images/rust-logo-blk.svg" alt="Rust logo" width="300rem" height="auto" style="position: absolute; right: 0rem; margin-top: -2rem;">
 
 # Rust
+
+- 3 year old programming language
+- Memory safety without garbage collection
+- Used by Mozilla, Dropbox, Cloudflare, …
+
+```rust
+enum Event {
+    Load,
+    KeyPress(char),
+    Click { x: i64, y: i64 }
+}
+
+fn print_event(event: Event) {
+    match event {
+        Event::Load => println!("Loaded"),
+        Event::KeyPress(c) => println!("Key {} pressed", c),
+        Event::Click {x, y} => println!("Clicket at x={}, y={}", x, y),
+    }
+}
+```
 
 ---
 
 # OS Development
 
+- “Bare metal” environment
+    - No underlying operating system
+    - No processes, threads, files, heap, …
+
+**Goals**
+
+- Creating abstractions
+    - For hardware devices <span class="grey">(drivers, files, network sockets, …)</span>
+    - For concurrency <span class="grey">(threads, synchronization primitives, IPC, …)</span>
+- Isolation <span class="grey">(processes, containers, virtual machines, …)</span>
+- Security <span class="grey">(access control, ASLR, …)</span>
+
+---
+
+# OS Develoment in Rust
+
+- Writing an OS in Rust
+- Redox
+- Nebulet
+
+-> What does using Rust mean for OS development?
 
 ---
 class: center, middle
