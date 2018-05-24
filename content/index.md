@@ -981,9 +981,11 @@ Rust means:
 
 - **Exciting New Features**.grey[ &nbsp;&nbsp;&nbsp;Futures, Async / Await]
 
----
-class: black-background
-count: false
+<div style="height:.5rem"></div>
+
+.grey[Slides are available at <https://os.phil-opp.com/talks>]
+
+--
 
 ---
 class: center, middle
