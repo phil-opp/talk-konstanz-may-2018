@@ -19,7 +19,8 @@ Notes for the _first_ slide!
 
 - _“Writing an OS in Rust”_ blog series
 
-!["Writing an OS in Rust" screenshot](content/images/writing-an-os-in-rust.png)
+
+<img class="center" alt="Screenshot of Writing an OS in Rust website" src="content/images/writing-an-os-in-rust.png" style="margin-left: auto; margin-right: auto; width: auto; height: 23rem;">
 
 ---
 <img src="content/images/rust-logo-blk.svg" alt="Rust logo" width="300rem" height="auto" style="position: absolute; right: 0rem; margin-top: -2rem;">
@@ -56,7 +57,7 @@ fn print_event(event: Event) {
 
 **Goals**
 
-- Creating abstractions
+- Abstractions
     - For hardware devices <span class="grey">(drivers, files, network sockets, …)</span>
     - For concurrency <span class="grey">(threads, synchronization primitives, IPC, …)</span>
 - Isolation <span class="grey">(processes, containers, virtual machines, …)</span>
@@ -482,17 +483,17 @@ fn equal(x: f32, y: f32) -> bool {
 --
 
 ```
-error: strict comparison of f32 or f64
+error: `strict comparison of f32 or f64`
  --> src/main.rs:2:8
   |
 2 | if x == y { true } else { false }
-  |    ^^^^^^ help: consider comparing them within some error: (x - y).abs() < err
+  |    ^^^^^^ help: `consider comparing them within some error: (x - y).abs() < err`
 
-warning: this if-then-else expression returns a bool literal
+warning: `this if-then-else expression returns a bool literal`
  --> src/main.rs:2:5
   |
 2 | if x == y { true } else { false }
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: you can reduce it to: x == y
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: `you can reduce it to: x == y`
 ```
 
 ---
@@ -535,7 +536,7 @@ fn parse_date(s: &str) -> Option<(u32, u32, u32)> {
 }
 proptest! {
     #[test]
-    fn parse_date(y in 0u32..10000, m in 1u32..13, d in 1u32..32) {
+    fn parse_date(`y in 0u32..10000`, `m in 1u32..13`, `d in 1u32..32`) {
         let (y2, m2, d2) = parse_date(
             &format!("{:04}-{:02}-{:02}", y, m, d)).unwrap();
         prop_assert_eq!((y, m, d), (y2, m2, d2));
