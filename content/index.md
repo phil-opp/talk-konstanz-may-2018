@@ -66,11 +66,58 @@ fn print_event(event: Event) {
 
 # OS Develoment in Rust
 
-- Writing an OS in Rust
-- Redox
-- Nebulet
+- **Writing an OS in Rust**: Tutorials for basic functionality
+    - Booting, testing, CPU exceptions, page tables
+    - No C dependencies
+    - Works on Linux, Windows, macOS
 
--> What does using Rust mean for OS development?
+<img class="center" alt="Screenshot of Writing an OS in Rust website" src="content/images/writing-an-os-in-rust.png" style="margin-left: auto; margin-right: auto; width: auto; height: 23rem;">
+
+---
+
+# OS Develoment in Rust
+
+- **Writing an OS in Rust**: Tutorials for basic functionality
+- **Redox OS**: Most complete Rust OS, microkernel design
+
+<img class="center" alt="Screenshot of Redox running a webbrowser and a file manager" src="content/images/redox-screenshot.png" style="margin-left: auto; margin-right: auto; width: auto; height: 25rem;">
+---
+
+# OS Develoment in Rust
+
+- **Writing an OS in Rust**: Tutorials for basic functionality
+- **Redox OS**: Most complete Rust OS, microkernel design
+- **Nebulet**: Experimental WebAssembly kernel
+    - WebAssembly is a binary format for executable code in web pages
+    - Idea: Run wasm applications instead of native binaries
+    - Wasm is sandboxed, so it can safely run in ring 0
+    - A bit slower than native code
+    - But no context switches
+
+---
+
+# OS Develoment in Rust
+
+- **Writing an OS in Rust**: Tutorials for basic functionality
+- **Redox OS**: Most complete Rust OS, microkernel design
+- **Nebulet**: Experimental WebAssembly kernel
+- **Tock**: Operating system for embedded systems
+
+<img class="center" alt="Screenshot of Tock website" src="content/images/tock-screenshot.png" style="margin-left: auto; margin-right: auto; width: auto; height: 22rem;">
+
+
+---
+
+# OS Develoment in Rust
+
+- **Writing an OS in Rust**: Tutorials for basic functionality
+- **Redox OS**: Most complete Rust OS, microkernel design
+- **Nebulet**: Experimental WebAssembly kernel
+- **Tock**: Operating system for embedded systems
+
+<div style="height:5rem"></div>
+
+.center[**What does using Rust mean for OS development?**]
 
 ---
 class: center, middle
