@@ -624,6 +624,19 @@ In Rust:
 
 ---
 
+# Great Tooling for OS Development
+
+In development: **bootimage test**
+
+- Basic integration test framework
+- Runs each test executable in an isolated QEMU instance
+    - Tests are completely independent
+    - Results are reported through the serial port
+- Allows testing in target environment
+
+Testing on real hardware?
+---
+
 class: center, middle
 
 .rust-means[Rust means…]
