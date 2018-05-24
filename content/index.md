@@ -15,12 +15,9 @@ Notes for the _first_ slide!
 - Rust user since 2014
 
 
---
-
 - _“Writing an OS in Rust”_ blog series
-
-
-<img class="center" alt="Screenshot of Writing an OS in Rust website" src="content/images/writing-an-os-in-rust.png" style="margin-left: auto; margin-right: auto; width: auto; height: 23rem;">
+- Work on embedded devices .grey[(in Rust of course)]
+- `rust-osdev` organization on Github
 
 ---
 <img src="content/images/rust-logo-blk.svg" alt="Rust logo" width="300rem" height="auto" style="position: absolute; right: 0rem; margin-top: -2rem;">
