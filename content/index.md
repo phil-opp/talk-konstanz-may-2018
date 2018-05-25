@@ -156,13 +156,9 @@ In C:
 ---
 # Memory Safety
 
-## Buffer Overflow Vulnerabitilies in Linux
+<img alt="Buffer Overflow Vulnerabilities in Linux" src="content/images/Buffer Overflow Vulnerabilities in Linux.svg" style="margin-top: 0rem; margin-bottom: -2rem;">
 
-<img src="content/images/Tux.svg" alt="Rust logo" width="100rem" height="auto" style="float: right; margin-top: -5rem;">
-
-<div class="chart-container" style="position: relative; width:100%">
-    <canvas id="linux-vulns"></canvas>
-</div>
+<img src="content/images/Tux.svg" alt="Linux logo" width="120rem" height="auto" style="display:block; position: absolute; top: 1rem; right: 3rem;">
 
 .grey[.small[Source: https://www.cvedetails.com/product/47/Linux-Linux-Kernel.html?vendor_id=33]]
 
@@ -176,13 +172,9 @@ In C:
 ---
 # Memory Safety
 
-## Linux CVEs in 2018 .grey[(Jan – Apr)]
+<img alt="Linux CVEs in 2018" src="content/images/Linux CVEs in 2018.svg" style="margin-top: 0rem; margin-bottom: -2rem;">
 
-<img src="content/images/Tux.svg" alt="Rust logo" width="100rem" height="auto" style="float: right; margin-top: -5rem;">
-
-<div class="chart-container" style="position: relative; width:100%">
-    <canvas id="linux-vulns-2018"></canvas>
-</div>
+<img src="content/images/Tux.svg" alt="Linux logo" width="120rem" height="auto" style="display:block; position: absolute; top: 1rem; right: 3rem;">
 
 .grey[.smaller[Source: https://www.cvedetails.com/vulnerability-list/vendor_id-33/product_id-47/year-2018/Linux-Linux-Kernel.html]]
 
