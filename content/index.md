@@ -404,8 +404,8 @@ If not used: .grey[_“warning: unused `MapperFlush` which must be used: Page Ta
 
 Allows to:
 
-- Make erroneous code impossible
-.grey[- Data behind a Mutex can't be accessed without locking]
+- Make misuse impossible
+.grey[- Impossible to access data behind a Mutex without locking]
 - Represent contracts in code instead of documentation
 .grey[
 - Page size of page and frame parameters must match in `map_to`
@@ -453,16 +453,16 @@ class: center, middle
 
 bitflags! {
     pub struct PageTableFlags: u64 {
-        const PRESENT =         1 << 0;
-        const WRITABLE =        1 << 1;
-        const HUGE_PAGE =       1 << 7;
+        const PRESENT =         1 << 0;    // bit 0
+        const WRITABLE =        1 << 1;    // bit 1
+        const HUGE_PAGE =       1 << 7;    // bit 7
         …
     }
 }
+
 fn main() {
     let stack_flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
-    let code_flags = PageTableFlags::PRESENT;
-    assert_eq!((stack_flags & code_flags), PageTableFlags::PRESENT);
+    assert_eq!(stack_flags.bits(), 0b11);
 }
 ```
 
@@ -478,11 +478,11 @@ fn main() {
 ```rust
 use arrayvec::ArrayVec;
 
-let mut array = ArrayVec::<[_; 16]>::new();
-array.push(1);
-array.push(2);
-assert_eq!(&array[..], &[1, 2]);
-assert_eq!(array.capacity(), 16);
+let mut vec = ArrayVec::<[_; 16]>::new();
+vec.push(1);
+vec.push(2);
+assert_eq!(vec.len(), 2);
+assert_eq!(vec.as_slice(), &[1, 2]);
 ```
 
 ---
@@ -1033,9 +1033,9 @@ impl<T: Generator> Future for GenFuture<T> {
 
 Rust means:
 
-- **Memory Safety**
-- **Encapsulating Unsafety**
-- **High Level Code**.grey[ &nbsp;&nbsp;&nbsp;Mutexes, Page Table Abstractions]
+- **Memory Safety**.grey[ &nbsp;&nbsp;&nbsp;no overflows, no invalid pointers, no data races]
+- **Encapsulating Unsafety**.grey[ &nbsp;&nbsp;&nbsp;creating safe interfaces]
+- **High Level Code**.grey[ &nbsp;&nbsp;&nbsp;make misuse impossible]
 
 
 - **Easy Dependency Management**.grey[ &nbsp;&nbsp;&nbsp;cargo, crates.io]
@@ -1046,7 +1046,7 @@ Rust means:
 - **No Elitism**
 
 
-- **Exciting New Features**.grey[ &nbsp;&nbsp;&nbsp;Futures, Async / Await]
+- **Exciting New Features**.grey[ &nbsp;&nbsp;&nbsp;futures, async / await]
 
 <div style="height:.5rem"></div>
 
@@ -1092,7 +1092,6 @@ fn read_info_buf(socket: &mut Socket) -> [u8; 1024]
 {
     let mut buf = [0; 1024];
     let mut cursor = 0;
-
     `while` cursor < 1024 {
         cursor += await!(socket.read(`&mut buf`[cursor..]))?;
     };
