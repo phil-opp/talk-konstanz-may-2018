@@ -748,10 +748,20 @@ class: center, middle
 ---
 # Exciting New Features
 
-- Futures
-- Async / await
-- webassembly?
+- Impl Trait
+- Non-Lexical Lifetimes
+- WebAssembly
 
+---
+# Exciting New Features
+
+In development: **Futures and async / await**
+
+- Simple and fast asynchronous code
+- Zero-cost abstractions
+- RFC accepted, implementation will land in nightly Rust soon
+
+How does it work? What does it mean for OS development?
 ---
 
 # Futures
@@ -1019,12 +1029,62 @@ impl<T: Generator> Future for GenFuture<T> {
 }
 ```
 
-
 ---
 
 # Async / Await: For OS Dev?
 
+- Everything happens at compile time
+    - Can be used in OS kernels and on embedded devices
+- Makes asynchronous code simpler
 
+<div style="height: 2rem;"></div>
+
+Use Case: **Cooperative multitasking**
+
+- Yield when waiting for I/O
+- Executor then polls another future
+- Interrupt handler notifies `Waker`
+- Only a single thread is needed
+    - Devices with limited memory
+
+---
+
+# Async / Await: An OS Without Blocking?
+
+A blocking thread makes its whole stack unusable
+
+- Makes threads heavy-weight
+- Limits the number of threads in the system
+
+What if blocking was not allowed?
+
+--
+
+- Threads would return futures instead of blocking
+- Stacks could be reused for different threads
+    - Only a few stacks are needed for many, many futures
+- Scheduler would schedule futures instead of threads
+    - Task-based instead of thread-based
+    - Would we still need threads at all?
+
+An OS without blocking might be possible!
+
+---
+
+# Exciting New Features
+
+In development: **Futures and async / await**
+
+- Simple and fast asynchronous code
+- Zero-cost abstractions
+- RFC accepted, implementation will land in nightly Rust soon
+
+<br>
+
+- New possibilities for OS development
+    - Simplify asynchronous code
+    - Cooperative Multitasking
+    - Innovative OS designs?
 
 
 ---
