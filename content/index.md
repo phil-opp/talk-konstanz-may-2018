@@ -229,7 +229,7 @@ pub fn flush_tlb() { // safe interface
 }
 ```
 
-⇒ Function can't be used in an `unsafe` way
+Function can't be used in an `unsafe` way ⇒ it can be safe
 
 ---
 # Encapsulating Unsafety
@@ -426,21 +426,86 @@ class: center, middle
 
 - Over 15000 crates on **crates.io**
 - Simply specify the desired version
-    - Add single line to `Cargo.toml`
+.grey[    - Add single line to `Cargo.toml`]
 - Cargo takes care of the rest
+.grey[    - Downloading, building, linking]
 
 --
 
-It works the same for OS kernels:
+<div style="height: 3rem;"></div>
 
-- Over 350 crates in the `no_std` category
+- It works the same for OS kernels
+    - Crates need to be `no_std`
+    - Useful crates: `bitflags`, `spin`, `arrayvec`, `x86_64`, …
+
+---
+# Easy Dependency Management
+
+- **bitflags**: A macro for generating structures with single-bit flags
+
+```rust
+#[macro_use] extern crate bitflags;
+
+bitflags! {
+    pub struct PageTableFlags: u64 {
+        const PRESENT =         1 << 0;
+        const WRITABLE =        1 << 1;
+        const HUGE_PAGE =       1 << 7;
+        …
+    }
+}
+fn main() {
+    let stack_flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
+    let code_flags = PageTableFlags::PRESENT;
+    assert_eq!((stack_flags & code_flags), PageTableFlags::PRESENT);
+}
+```
+
+---
+# Easy Dependency Management
+
+- **bitflags**: A macro for generating structures with single-bit flags
+- **spin**: Spinning synchronization primitives such as spinlocks
+
+--
+- **arrayvec**: Stack-based vectors backed by a fixed sized array
+
+```rust
+use arrayvec::ArrayVec;
+
+let mut array = ArrayVec::<[_; 16]>::new();
+array.push(1);
+array.push(2);
+assert_eq!(&array[..], &[1, 2]);
+assert_eq!(array.capacity(), 16);
+```
+
+---
+# Easy Dependency Management
+
+- **bitflags**: A macro for generating structures with single-bit flags
+- **spin**: Spinning synchronization primitives such as spinlocks
+- **arrayvec**: Stack-based vectors backed by a fixed sized array
+- **x86_64**: Structures, registers, and instructions specific to `x86_64`
+    - Control registers
+    - I/O ports
+    - Page Tables
+    - Interrupt Descriptor Tables
+    - …
+
+---
+# Easy Dependency Management
+
+- **bitflags**: A macro for generating structures with single-bit flags
+- **spin**: Spinning synchronization primitives such as spinlocks
+- **arrayvec**: Stack-based vectors backed by a fixed sized array
+- **x86_64**: Structures, registers, and instructions specific to `x86_64`
+
+
+<div style="height: 3rem;"></div>
+
+- Over 350 crates in the no_std category
     - Many more can be trivially made `no_std`
-- Dependencies of the Redox kernel:
- - `bitflags`: .grey[A macro for generating structures with single-bit flags.]
- - `linked_list_allocator`: .grey[A simple memory allocator.]
- - `spin`: .grey[Spinning synchronization primitives such as spinlocks.]
- - `x86`: .grey[Structures, registers, and instructions specific to `x86` CPUs.]
- - etc.
 
 ---
 
