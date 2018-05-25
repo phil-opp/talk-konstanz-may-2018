@@ -3,6 +3,11 @@ name: title
 count: false
 
 # The Rust Way of OS Development
+
+.grey[Philipp Oppermann]
+
+.small[.grey[May 30, 2018 <span style="margin-left: 2rem"></span> HTWG Konstanz]]
+
 ???
 
 Notes for the _first_ slide!
