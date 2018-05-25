@@ -16,8 +16,13 @@ Notes for the _first_ slide!
 
 
 - _“Writing an OS in Rust”_ blog series
-- Work on embedded devices .grey[(in Rust of course)]
+- Embedded Rust development
+
+
 - `rust-osdev` organization on Github
+    - Host and maintain tools/libraries for Rust OS development
+    - Crates: `x86_64`, `acpi`, `multiboot2-elf64`, `bootloader`, `bootimage`
+    - Join us!
 
 ---
 <img src="content/images/rust-logo-blk.svg" alt="Rust logo" width="300rem" height="auto" style="position: absolute; right: 0rem; margin-top: -2rem;">
