@@ -748,12 +748,15 @@ class: center, middle
 ---
 # Exciting New Features
 
-- Impl Trait
-- Non-Lexical Lifetimes
-- WebAssembly
+- **Impl Trait**: Return closures from functions
+- **Non-Lexical Lifetimes**: A more intelligent borrow checker
+- **WebAssembly**: Run Rust in a browser
 
----
-# Exciting New Features
+TODO: Erläuterungen?
+
+<div style="height: 1rem"></div>
+
+--
 
 In development: **Futures and async / await**
 
@@ -1073,13 +1076,18 @@ An OS without blocking might be possible!
 
 # Exciting New Features
 
+- **Impl Trait**: Return closures from functions
+- **Non-Lexical Lifetimes**: A more intelligent borrow checker
+- **WebAssembly**: Run Rust in a browser
+
+<div style="height: 1rem"></div>
+
 In development: **Futures and async / await**
 
 - Simple and fast asynchronous code
 - Zero-cost abstractions
 - RFC accepted, implementation will land in nightly Rust soon
 
-<br>
 
 - New possibilities for OS development
     - Simplify asynchronous code
@@ -1106,7 +1114,7 @@ Rust means:
 - **No Elitism**
 
 
-- **Exciting New Features**.grey[ &nbsp;&nbsp;&nbsp;futures, async / await]
+- **Exciting New Features**.grey[ &nbsp;&nbsp;&nbsp;impl trait, wasm, futures, async / await]
 
 <div style="height:.5rem"></div>
 
