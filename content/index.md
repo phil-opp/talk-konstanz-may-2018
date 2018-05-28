@@ -780,9 +780,7 @@ class: center, middle
 
 - **Impl Trait**: Return closures from functions
 - **Non-Lexical Lifetimes**: A more intelligent borrow checker
-- **WebAssembly**: Run Rust in a browser
-
-TODO: Erläuterungen?
+- **WebAssembly**: Run Rust in browsers
 
 <div style="height: 1rem"></div>
 
