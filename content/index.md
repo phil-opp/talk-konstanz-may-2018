@@ -23,12 +23,7 @@ Notes for the _first_ slide!
 - _“Writing an OS in Rust”_ blog series <span class="grey">(<a href="https://os.phil-opp.com">os.phil-opp.com</a>)</span>
 - Embedded Rust development
 
-
-- `rust-osdev` organization on Github
-    - Host and maintain tools/libraries for Rust OS development
-    - Crates: `x86_64`, `acpi`, `multiboot2-elf64`, `bootloader`, `bootimage`
-    - Join us!
-
+<div style="height: 2rem"></div>
 
 Contact:
 
