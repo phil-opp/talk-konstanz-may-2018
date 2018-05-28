@@ -706,40 +706,70 @@ class: center, middle
 
 .rust-means[Rust means…]
 
-# An Awesome Community
----
-# An Awesome Community
+# No Elitism
 
-- torvalds rant
-- only positive comments
-- Awesome developers: Redox
+---
+
+# No Elitism
+
+Typical Elitism in OS development:
+
+> “A **decade of programming**, including a few years of low-level coding in assembly language and/or a systems language such as C, is **pretty much the minimum necessary** to even understand the topic well enough to work in it.”
+
+.right[.grey[From [wiki.osdev.org/Beginner_Mistakes](https://wiki.osdev.org/Beginner_Mistakes)]]
+
+Most Rust Projects:
+
+- It doesn't matter where you come from
+    - C, C++, Java, Python, JavaScript, …
+    - Academia, Industry, School, …
+- It's fine to ask questions
+    - People are happy to help
+
+---
+
+# No Elitism
+
+- **IntermezzOS**: “People who have not done low-level programming before are a specific target of this book“
+
+<img src="content/images/intermezzos.png" style="margin-left: auto; margin-right: auto; width: 20rem; display: block;">
+
+
+- **Writing an OS in Rust**: Deliberately no particular target audience
+    - People can decide themselves
+    - Provide links for things not explained on the blog
+        - E.g. for advanced Rust and OS concepts
 
 ---
 class: center, middle
 
 .rust-means[Rust means…]
 
-# No Elitism
+# An Awesome Community
+---
+# An Awesome Community
+
+- Code of Conduct from the beginning
+    - “We are committed to providing a **friendly, safe and welcoming environment** for all […]”
+    - “We will exclude you from interaction if you insult, demean or harass anyone”
+    - Followed on GitHub, IRC, the Rust subreddit, etc.
+--
+- It works!
+    - No inappropriate comments for “Writing an OS in Rust” so far
+    - Focused technical discussions, even on reddit
+
+--
+
+<div style="height: 1rem"></div>
+
+**_vs_**:
+
+> “So this patch is utter and absolute garbage, and should be shot in the
+head and buried very very deep.”
+
+<div class="right small grey" style="margin-top: -3rem;"><a href="https://lkml.org/lkml/2017/8/14/698">Linus Torvalds on 14 Aug 2017</a></div>
 
 ---
-
-# No Elitism
-
-> “A **decade of programming**, including a few years of low-level coding in assembly language and/or a systems language such as C, is **pretty much the minimum necessary** to even understand the topic well enough to work in it.”
-
-.right[.grey[From [**wiki.osdev.org**/Beginner_Mistakes](https://wiki.osdev.org/Beginner_Mistakes)]]
-
-**_vs._**
-
-> The book assumes that you have programmed in some language before, but not any particular one. In fact, **people who have not done low-level programming before are a specific target of this book**.
-
-.right[.grey[From [**intermezzos.org**/book](http://intermezzos.github.io/book/second-edition/)]]
-
----
-blog_os
-
----
-
 class: center, middle
 
 .rust-means[Rust means…]
@@ -1110,8 +1140,8 @@ Rust means:
 - **Great Tooling**.grey[ &nbsp;&nbsp;&nbsp;clippy, bors, proptest, bootimage]
 
 
-- **An Awesome Community**
-- **No Elitism**
+- **No Elitism** .grey[ &nbsp;&nbsp;&nbsp;asking questions is fine, no minimum requirements]
+- **An Awesome Community** .grey[ &nbsp;&nbsp;&nbsp;code of conduct, awesome people]
 
 
 - **Exciting New Features**.grey[ &nbsp;&nbsp;&nbsp;impl trait, wasm, futures, async / await]
