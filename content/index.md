@@ -20,7 +20,7 @@ Notes for the _first_ slide!
 - Rust user since 2014
 
 
-- _“Writing an OS in Rust”_ blog series
+- _“Writing an OS in Rust”_ blog series <span class="grey">(<a href="https://os.phil-opp.com">os.phil-opp.com</a>)</span>
 - Embedded Rust development
 
 
@@ -29,6 +29,11 @@ Notes for the _first_ slide!
     - Crates: `x86_64`, `acpi`, `multiboot2-elf64`, `bootloader`, `bootimage`
     - Join us!
 
+
+Contact:
+
+- phil-opp on GitHub
+- Email: hello@phil-opp.com
 ---
 <img src="content/images/rust-logo-blk.svg" alt="Rust logo" width="300rem" height="auto" style="position: absolute; right: 0rem; margin-top: -2rem;">
 
@@ -49,7 +54,7 @@ fn print_event(event: Event) {
     match event {
         Event::Load => println!("Loaded"),
         Event::KeyPress(c) => println!("Key {} pressed", c),
-        Event::Click {x, y} => println!("Clicket at x={}, y={}", x, y),
+        Event::Click {x, y} => println!("Clicked at x={}, y={}", x, y),
     }
 }
 ```
@@ -72,7 +77,7 @@ fn print_event(event: Event) {
 
 ---
 
-# OS Develoment in Rust
+# OS Development in Rust
 
 - **Writing an OS in Rust**: Tutorials for basic functionality
     - Booting, testing, CPU exceptions, page tables
@@ -83,7 +88,7 @@ fn print_event(event: Event) {
 
 ---
 
-# OS Develoment in Rust
+# OS Development in Rust
 
 - **Writing an OS in Rust**: Tutorials for basic functionality
 - **Redox OS**: Most complete Rust OS, microkernel design
@@ -91,37 +96,36 @@ fn print_event(event: Event) {
 <img class="center" alt="Screenshot of Redox running a webbrowser and a file manager" src="content/images/redox-screenshot.png" style="margin-left: auto; margin-right: auto; width: auto; height: 25rem;">
 ---
 
-# OS Develoment in Rust
+# OS Development in Rust
 
 - **Writing an OS in Rust**: Tutorials for basic functionality
 - **Redox OS**: Most complete Rust OS, microkernel design
+- **Tock**: Operating system for embedded systems
+
+<img class="center" alt="Screenshot of Tock website" src="content/images/tock-screenshot.png" style="margin-left: auto; margin-right: auto; width: auto; height: 22rem;">
+
+---
+
+# OS Development in Rust
+
+- **Writing an OS in Rust**: Tutorials for basic functionality
+- **Redox OS**: Most complete Rust OS, microkernel design
+- **Tock**: Operating system for embedded systems
 - **Nebulet**: Experimental WebAssembly kernel
     - WebAssembly is a binary format for executable code in web pages
     - Idea: Run wasm applications instead of native binaries
     - Wasm is sandboxed, so it can safely run in ring 0
     - A bit slower than native code
-    - But no context switches
+    - But no context switches or syscalls
 
 ---
 
-# OS Develoment in Rust
+# OS Development in Rust
 
 - **Writing an OS in Rust**: Tutorials for basic functionality
 - **Redox OS**: Most complete Rust OS, microkernel design
-- **Nebulet**: Experimental WebAssembly kernel
 - **Tock**: Operating system for embedded systems
-
-<img class="center" alt="Screenshot of Tock website" src="content/images/tock-screenshot.png" style="margin-left: auto; margin-right: auto; width: auto; height: 22rem;">
-
-
----
-
-# OS Develoment in Rust
-
-- **Writing an OS in Rust**: Tutorials for basic functionality
-- **Redox OS**: Most complete Rust OS, microkernel design
 - **Nebulet**: Experimental WebAssembly kernel
-- **Tock**: Operating system for embedded systems
 
 <div style="height:5rem"></div>
 
@@ -141,7 +145,7 @@ class: center, middle
 - No invalid memory accesses
     - No buffer overflows
     - No dangling pointers
-    - No race conditions
+    - No data races
 - Guaranteed by Rust's ownership system
 .grey[- Violations are only possible using `unsafe`]
 
@@ -182,6 +186,13 @@ In C:
 <img src="content/images/Tux.svg" alt="Linux logo" width="120rem" height="auto" style="display:block; position: absolute; top: 1rem; right: 3rem;">
 
 .grey[.smaller[Source: https://www.cvedetails.com/vulnerability-list/vendor_id-33/product_id-47/year-2018/Linux-Linux-Kernel.html]]
+
+
+???
+
+.grey[
+- CVE = Common Vulnerabilities and Exposures
+]
 
 ---
 # Memory Safety: A Strict Compiler
@@ -229,8 +240,8 @@ Example:
 /// Invalidate the TLB completely by reloading the CR3 register.
 pub fn flush_tlb() { // safe interface
     use registers::control::Cr3;
-    let (frame, flags) = Cr3::read();
-    unsafe { Cr3::write(frame, flags) }
+    let (frame, flags) = read_cr3();
+    unsafe { write_cr3(frame, flags) }
 }
 ```
 
@@ -339,10 +350,10 @@ mutex.unlock();
 let mutex = Mutex::new(data);
 
 // compilation error: data was moved
-data.push(5);
+data.push(4);
 
 let mut d = mutex.lock().unwrap();
-d.push(4);
+d.push(5);
 // released at end of scope
 </pre></code>
             </td>
@@ -366,9 +377,9 @@ pub trait Mapper<S: PageSize> {
         frame: PhysFrame<S>,        // to this frame
         flags: PageTableFlags,
         frame_allocator: &mut A,    // we might need frames for new page tables
-    ) -> Result<MapperFlush<S>, MapToError>
+    )
     where
-        A: FnMut() -> Option<PhysFrame<Size4KB>>;
+        A: FnMut() -> PhysFrame<Size4KB>;
 }
 
 impl PageSize for Size4KB {…} // standard page
@@ -377,26 +388,55 @@ impl PageSize for Size1GB {…} // “giant” 1GB page (only on some architectu
 ```
 
 ---
+count: false
 
 # High Level Code: Page Table Abstractions
 
 From the `x86_64` crate:
 
 ```Rust
-#[must_use = "Page Table changes must be flushed or ignored."]
-pub struct MapperFlush<S: PageSize>(Page<S>);
-
-impl<S: PageSize> MapperFlush<S> {
-    // Flush the TLB entry for this page
-    pub fn flush(self) {
-        tlb::flush(self.0.start_address());
-    }
-
-    pub fn ignore(self) {}
+pub trait Mapper<`S: PageSize`> {
+    fn map_to<A>(
+        &mut self,
+        page: Page<`S`>,              // map this page
+        frame: PhysFrame<`S`>,        // to this frame
+        flags: PageTableFlags,
+        frame_allocator: &mut A,    // we might need frames for new page tables
+    )
+    where
+        A: FnMut() -> PhysFrame<Size4KB>;
 }
+
+impl PageSize for `Size4KB` {…} // standard page
+impl PageSize for `Size2MB` {…} // “huge” 2MB page
+impl PageSize for `Size1GB` {…} // “giant” 1GB page (only on some architectures)
 ```
 
-If not used: .grey[_“warning: unused `MapperFlush` which must be used: Page Table changes must be flushed or ignored.”_]
+---
+
+count: false
+
+# High Level Code: Page Table Abstractions
+
+From the `x86_64` crate:
+
+```Rust
+pub trait Mapper<S: PageSize> {
+    fn map_to<`A`>(
+        &mut self,
+        page: Page<S>,              // map this page
+        frame: PhysFrame<S>,        // to this frame
+        flags: PageTableFlags,
+        frame_allocator: `&mut A`,    // we might need frames for new page tables
+    )
+    where
+        `A: FnMut() -> PhysFrame<Size4KB>`;
+}
+
+impl PageSize for Size4KB {…} // standard page
+impl PageSize for Size2MB {…} // “huge” 2MB page
+impl PageSize for Size1GB {…} // “giant” 1GB page (only on some architectures)
+```
 
 ---
 
@@ -409,7 +449,6 @@ Allows to:
 - Represent contracts in code instead of documentation
 .grey[
 - Page size of page and frame parameters must match in `map_to`
-- The TLB entry must be flushed after mapping
 - Additional frames are needed (from any allocator)
 ]
 
@@ -478,7 +517,7 @@ fn main() {
 ```rust
 use arrayvec::ArrayVec;
 
-let mut vec = ArrayVec::<[_; 16]>::new();
+let mut vec = ArrayVec::<[i32; 16]>::new();
 vec.push(1);
 vec.push(2);
 assert_eq!(vec.len(), 2);
@@ -701,46 +740,6 @@ In development: **bootimage test**
 
 Testing on real hardware?
 ---
-
-class: center, middle
-
-.rust-means[Rust means…]
-
-# No Elitism
-
----
-
-# No Elitism
-
-Typical Elitism in OS development:
-
-> “A **decade of programming**, including a few years of low-level coding in assembly language and/or a systems language such as C, is **pretty much the minimum necessary** to even understand the topic well enough to work in it.”
-
-.right[.grey[From [wiki.osdev.org/Beginner_Mistakes](https://wiki.osdev.org/Beginner_Mistakes)]]
-
-Most Rust Projects:
-
-- It doesn't matter where you come from
-    - C, C++, Java, Python, JavaScript, …
-    - Academia, Industry, School, …
-- It's fine to ask questions
-    - People are happy to help
-
----
-
-# No Elitism
-
-- **IntermezzOS**: “People who have not done low-level programming before are a specific target of this book“
-
-<img src="content/images/intermezzos.png" style="margin-left: auto; margin-right: auto; width: 20rem; display: block;">
-
-
-- **Writing an OS in Rust**: Deliberately no particular target audience
-    - People can decide themselves
-    - Provide links for things not explained on the blog
-        - E.g. for advanced Rust and OS concepts
-
----
 class: center, middle
 
 .rust-means[Rust means…]
@@ -774,6 +773,45 @@ class: center, middle
 
 .rust-means[Rust means…]
 
+# No Elitism
+
+---
+
+# No Elitism
+
+Typical elitism in OS development:
+
+> “A **decade of programming**, including a few years of low-level coding in assembly language and/or a systems language such as C, is **pretty much the minimum necessary** to even understand the topic well enough to work in it.”
+
+.right[.grey[From [wiki.osdev.org/Beginner_Mistakes](https://wiki.osdev.org/Beginner_Mistakes)]]
+
+Most Rust Projects:
+
+- It doesn't matter where you come from
+    - C, C++, Java, Python, JavaScript, …
+    - Academia, Industry, School, …
+- It's fine to ask questions
+    - People are happy to help
+
+---
+
+# No Elitism
+
+- **IntermezzOS**: “People who have not done low-level programming before are a specific target of this book“
+
+<img src="content/images/intermezzos.png" style="margin-left: auto; margin-right: auto; width: 20rem; display: block;">
+
+
+- **Writing an OS in Rust**: Deliberately no particular target audience
+    - People can decide themselves
+    - Provide links for things not explained on the blog
+        - E.g. for advanced Rust and OS concepts
+
+---
+class: center, middle
+
+.rust-means[Rust means…]
+
 # Exciting New Features
 ---
 # Exciting New Features
@@ -790,9 +828,10 @@ In development: **Futures and async / await**
 
 - Simple and fast asynchronous code
 - Zero-cost abstractions
-- RFC accepted, implementation will land in nightly Rust soon
 
-How does it work? What does it mean for OS development?
+
+- How does it work?
+- What does it mean for OS development?
 ---
 
 # Futures
@@ -863,14 +902,14 @@ Asynchronous variant:
 ​`async` fn get_user_from_database(user_id: u64) -> Result<User> {…}
 
 ​`async` fn handle_request(request: Request) -> Result<Response> {
-    let user = `await!`(get_user_from_database(request.user_id))?;
+    let future = get_user_from_database(request.user_id);
+    let user = `await!`(future)?;
     generate_response(user)
 }
 ```
 
 - Async functions return `Future<Item=T>` instead of `T`
 - No blocking occurs
-    - It only _looks_ blocking
     - Stack can be reused for handling other requests
 - Thousands of concurrent requests possible
 
@@ -972,48 +1011,10 @@ let mut generator = {
             }
         }
     }
-    Generator::Start(ret)
+    Generator::Start(42, "foo")
 };
 ```
 
----
-
-# Async / Await: Generators
-
-- Why is `resume` unsafe?
-
-<table style="border: none; margin-top: -2rem; margin-bottom: -2rem;">
-    <tbody>
-        <tr style="vertical-align: top;">
-            <td>
-<pre><code class="Rust">fn main() {
-    let mut generator = move || {
-        let foo = 42;
-        `let bar = &foo;`
-        yield;
-        return bar
-    };
-    unsafe { generator.resume() };
-    `let heap_generator = Box::new(generator);`
-    unsafe { heap_generator.resume() };
-}</pre></code>
-            </td><td style="text-align: left;">
-<pre><code class="Rust">enum Generator {
-    Start,
-    Yield1(i32, &i32),
-    Done,
-}
-</pre></code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
---
-
-- Generator contains reference to itself
-    - No longer valid when moved to the heap ⇒ undefined behavior
-    - Must not be moved after first `resume`
 ---
 
 # Async / Await: Implementation
@@ -1050,7 +1051,7 @@ Transform Generator into Future:
 struct GenFuture<T>(T);
 
 impl<T: Generator> Future for GenFuture<T> {
-    fn poll(&mut self) -> Poll<T::Item, T::Error> {
+    fn poll(&mut self, cx: &mut Context) -> Result<Async<T::Item>, T::Error> {
         match unsafe { self.0.resume() } {
             GeneratorStatus::Complete(Ok(result)) => Ok(Async::Ready(result)),
             GeneratorStatus::Complete(Err(e)) => Err(e),
@@ -1093,10 +1094,11 @@ What if blocking was not allowed?
 
 - Threads would return futures instead of blocking
 - Stacks could be reused for different threads
-    - Only a few stacks are needed for many, many futures
 - Scheduler would schedule futures instead of threads
-    - Task-based instead of thread-based
-    - Would we still need threads at all?
+
+
+- Task-based instead of thread-based concurrency
+- Only a few stacks are needed for many, many futures
 
 An OS without blocking might be possible!
 
@@ -1115,11 +1117,11 @@ Rust means:
 - **Great Tooling**.grey[ &nbsp;&nbsp;&nbsp;clippy, bors, proptest, bootimage]
 
 
+- **An Awesome Community** .grey[ &nbsp;&nbsp;&nbsp;code of conduct]
 - **No Elitism** .grey[ &nbsp;&nbsp;&nbsp;asking questions is fine, no minimum requirements]
-- **An Awesome Community** .grey[ &nbsp;&nbsp;&nbsp;code of conduct, awesome people]
 
 
-- **Exciting New Features**.grey[ &nbsp;&nbsp;&nbsp;impl trait, wasm, futures, async / await]
+- **Exciting New Features**.grey[ &nbsp;&nbsp;&nbsp;futures, async / await]
 
 <div style="height:.5rem"></div>
 
@@ -1131,6 +1133,45 @@ Rust means:
 class: center, middle
 
 # Extra Slides
+
+---
+
+# Async / Await: Generators
+
+- Why is `resume` unsafe?
+
+<table style="border: none; margin-top: -2rem; margin-bottom: -2rem;">
+    <tbody>
+        <tr style="vertical-align: top;">
+            <td>
+<pre><code class="Rust">fn main() {
+    let mut generator = move || {
+        let foo = 42;
+        `let bar = &foo;`
+        yield;
+        return bar
+    };
+    unsafe { generator.resume() };
+    `let heap_generator = Box::new(generator);`
+    unsafe { heap_generator.resume() };
+}</pre></code>
+            </td><td style="text-align: left;">
+<pre><code class="Rust">enum Generator {
+    Start,
+    Yield1(i32, &i32),
+    Done,
+}
+</pre></code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+--
+
+- Generator contains reference to itself
+    - No longer valid when moved to the heap ⇒ undefined behavior
+    - Must not be moved after first `resume`
 
 ---
 
