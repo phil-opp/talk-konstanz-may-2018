@@ -603,30 +603,6 @@ warning: `this if-then-else expression returns a bool literal`
 
 # Great Tooling
 
-- **bors**: Test merges of pull requests before pushing them
-    - Ensure that master branch is always green
-
-<table>
-    <thead><tr><th width="50%" style="text-align: center">Without bors</th><th width="50%">With bors</th></tr></thead>
-    <tbody>
-        <tr>
-            <td style="padding:1rem">
-                <img src="content/images/without-bors.svg">
-            </td><td style="padding:1rem">
-                <img src="content/images/with-bors.svg">
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<div style="height:2rem"></div>
-
-.grey[.small[See https://bors.tech/essay/2017/02/02/pitch/]]
-
----
-
-# Great Tooling
-
 - **proptest**: A property testing framework
 
 ```rust
@@ -1114,7 +1090,7 @@ Rust means:
 
 
 - **Easy Dependency Management**.grey[ &nbsp;&nbsp;&nbsp;cargo, crates.io]
-- **Great Tooling**.grey[ &nbsp;&nbsp;&nbsp;clippy, bors, proptest, bootimage]
+- **Great Tooling**.grey[ &nbsp;&nbsp;&nbsp;clippy, proptest, bootimage]
 
 
 - **An Awesome Community** .grey[ &nbsp;&nbsp;&nbsp;code of conduct]
