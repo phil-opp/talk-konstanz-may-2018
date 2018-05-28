@@ -1104,29 +1104,6 @@ An OS without blocking might be possible!
 
 ---
 
-# Exciting New Features
-
-- **Impl Trait**: Return closures from functions
-- **Non-Lexical Lifetimes**: A more intelligent borrow checker
-- **WebAssembly**: Run Rust in a browser
-
-<div style="height: 1rem"></div>
-
-In development: **Futures and async / await**
-
-- Simple and fast asynchronous code
-- Zero-cost abstractions
-- RFC accepted, implementation will land in nightly Rust soon
-
-
-- New possibilities for OS development
-    - Simplify asynchronous code
-    - Cooperative Multitasking
-    - Innovative OS designs?
-
-
----
-
 # Summary
 
 Rust means:
