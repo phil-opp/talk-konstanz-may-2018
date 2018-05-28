@@ -70,10 +70,10 @@ fn print_event(event: Event) {
 **Goals**
 
 - Abstractions
-    - For hardware devices <span class="grey">(drivers, files, network sockets, …)</span>
-    - For concurrency <span class="grey">(threads, synchronization primitives, IPC, …)</span>
-- Isolation <span class="grey">(processes, containers, virtual machines, …)</span>
-- Security <span class="grey">(access control, ASLR, …)</span>
+    - For hardware devices <span class="grey">(drivers, files, …)</span>
+    - For concurrency <span class="grey">(threads, synchronization primitives, …)</span>
+- Isolation <span class="grey">(processes, address spaces, …)</span>
+- Security
 
 ---
 
@@ -114,9 +114,9 @@ fn print_event(event: Event) {
 - **Nebulet**: Experimental WebAssembly kernel
     - WebAssembly is a binary format for executable code in web pages
     - Idea: Run wasm applications instead of native binaries
-    - Wasm is sandboxed, so it can safely run in ring 0
+    - Wasm is sandboxed, so it can safely run in kernel address space
     - A bit slower than native code
-    - But no context switches or syscalls
+    - But no expensive context switches or syscalls
 
 ---
 
@@ -779,7 +779,7 @@ Most Rust Projects:
 
 
 - **Writing an OS in Rust**: Deliberately no particular target audience
-    - People can decide themselves
+    - People are able to decide themselves
     - Provide links for things not explained on the blog
         - E.g. for advanced Rust and OS concepts
 
