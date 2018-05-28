@@ -248,76 +248,6 @@ pub fn flush_tlb() { // safe interface
 Function can't be used in an `unsafe` way ⇒ it can be safe
 
 ---
-# Encapsulating Unsafety
-
-Not possible in all cases:
-
-```rust
-/// Write a new root table address into the CR3 register.
-pub fn write_cr3(page_table_frame: PhysFrame, flags: Cr3Flags) {
-    let addr = page_table_frame.start_address();
-    let value = addr.as_u64() | flags.bits();
-    unsafe { asm!("mov $0, %cr3" :: "r" (value) : "memory"); }
-}
-```
-
---
-
-**Problem**: Passing an invalid `PhysFrame` could break memory safety!
-
-- A frame that is no page table
-- A page table that maps all pages to the same frame
-- A page table that maps two random pages to the same frame
-
----
-count: false
-
-# Encapsulating Unsafety
-
-Not possible in all cases:
-
-```rust
-/// Write a new root table address into the CR3 register.
-pub `unsafe` fn write_cr3(page_table_frame: PhysFrame, flags: Cr3Flags) {
-    let addr = page_table_frame.start_address();
-    let value = addr.as_u64() | flags.bits();
-    asm!("mov $0, %cr3" :: "r" (value) : "memory");
-}
-```
-
-**Problem**: Passing an invalid `PhysFrame` could break memory safety!
-
-- A frame that is no page table
-- A page table that maps all pages to the same frame
-- A page table that maps two random pages to the same frame
-
-⇒ Function needs to be .mark[`unsafe`] because it depends on valid input
-
----
-class: extra-spacing
-
-# Encapsulating Unsafety
-
-Edge Cases: Functions that…
-
-- … disable paging?
---
-<span style="margin-left:3rem;"></span> `unsafe`
-- … disable CPU interrupts?
---
-<span style="margin-left:3rem;"></span> `safe`
-- … might cause CPU exceptions?
---
-<span style="margin-left:3rem;"></span> `safe`
-- … can be only called from privileged mode?
---
-<span style="margin-left:3rem;"></span> `safe`
-- … assume certain things about the hardware? <span style="margin-left:3rem;"></span> .hidden[`depends`]
-    - E.g. there is a VGA text buffer at `0xb8000`
---
-class: no-hide
-
----
 class: center, middle
 
 .rust-means[Rust means…]
@@ -1109,6 +1039,76 @@ Rust means:
 class: center, middle
 
 # Extra Slides
+
+---
+# Encapsulating Unsafety
+
+Not possible in all cases:
+
+```rust
+/// Write a new root table address into the CR3 register.
+pub fn write_cr3(page_table_frame: PhysFrame, flags: Cr3Flags) {
+    let addr = page_table_frame.start_address();
+    let value = addr.as_u64() | flags.bits();
+    unsafe { asm!("mov $0, %cr3" :: "r" (value) : "memory"); }
+}
+```
+
+--
+
+**Problem**: Passing an invalid `PhysFrame` could break memory safety!
+
+- A frame that is no page table
+- A page table that maps all pages to the same frame
+- A page table that maps two random pages to the same frame
+
+---
+count: false
+
+# Encapsulating Unsafety
+
+Not possible in all cases:
+
+```rust
+/// Write a new root table address into the CR3 register.
+pub `unsafe` fn write_cr3(page_table_frame: PhysFrame, flags: Cr3Flags) {
+    let addr = page_table_frame.start_address();
+    let value = addr.as_u64() | flags.bits();
+    asm!("mov $0, %cr3" :: "r" (value) : "memory");
+}
+```
+
+**Problem**: Passing an invalid `PhysFrame` could break memory safety!
+
+- A frame that is no page table
+- A page table that maps all pages to the same frame
+- A page table that maps two random pages to the same frame
+
+⇒ Function needs to be .mark[`unsafe`] because it depends on valid input
+
+---
+class: extra-spacing
+
+# Encapsulating Unsafety
+
+Edge Cases: Functions that…
+
+- … disable paging?
+--
+<span style="margin-left:3rem;"></span> `unsafe`
+- … disable CPU interrupts?
+--
+<span style="margin-left:3rem;"></span> `safe`
+- … might cause CPU exceptions?
+--
+<span style="margin-left:3rem;"></span> `safe`
+- … can be only called from privileged mode?
+--
+<span style="margin-left:3rem;"></span> `safe`
+- … assume certain things about the hardware? <span style="margin-left:3rem;"></span> .hidden[`depends`]
+    - E.g. there is a VGA text buffer at `0xb8000`
+--
+class: no-hide
 
 ---
 
