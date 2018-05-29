@@ -216,25 +216,44 @@ class: center, middle
 
 # Encapsulating Unsafety
 
+- Not everything can be verified at compile time
+- Rust has `unsafe` blocks that allow to
+    - Dereference raw pointers
+    - Call `unsafe` functions
+    - Access mutable statics
+    - Implement `unsafe` traits
+
+
 - Sometimes you need `unsafe` in a kernel
     - Writing to the VGA text buffer at `0xb8000`
     - Modifying CPU configuration registers
     - Switching the address space (reloading `CR3`)
+
+
 - Goal: Provide safe abstractions that encapsulate unsafety
+---
 
-
-Example:
+# Encapsulating Unsafety: Example
 
 ```rust
+/// Read current page table
+pub fn read_cr3() -> PhysFrame { … }
+/// Load a new page table
+pub `unsafe` fn write_cr3(frame: PhysFrame) { … }
+
 /// Invalidate the TLB completely by reloading the CR3 register.
 pub fn flush_tlb() { // safe interface
-    use registers::control::Cr3;
-    let (frame, flags) = read_cr3();
-    unsafe { write_cr3(frame, flags) }
+    let frame = read_cr3();
+    `unsafe` { write_cr3(frame) }
 }
 ```
 
-Function can't be used in an `unsafe` way ⇒ it can be safe
+- The `CR3` register holds the root page table address
+    - Reading is safe
+    - Writing is `unsafe` <span class="grey"> (because it changes the address mapping)</span>
+- The `flush_tlb` function provides a safe interface
+    - It can't be used in an `unsafe` way
+
 
 ---
 class: center, middle
