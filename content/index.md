@@ -972,7 +972,7 @@ impl<T: Generator> Future for GenFuture<T> {
 
 ---
 
-# Async / Await: For OS Dev?
+# Async / Await: For OS Development?
 
 - Everything happens at compile time
     - Can be used in OS kernels and on embedded devices
