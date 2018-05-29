@@ -17,9 +17,6 @@ Notes for the _first_ slide!
 # About Me
 
 - Computer science student at KIT .grey[(Karlsruhe)]
-- Rust user since 2014
-
-
 - _“Writing an OS in Rust”_ blog series <span class="grey">(<a href="https://os.phil-opp.com">os.phil-opp.com</a>)</span>
 - Embedded Rust development
 
