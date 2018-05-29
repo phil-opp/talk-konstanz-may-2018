@@ -193,7 +193,6 @@ In C:
 # Memory Safety: A Strict Compiler
 
 - It can take some time until your program compiles
-    - “Fighting the borrow checker”
 - Lifetimes can be complicated
     - “error: `x` does not live long enough”
 
@@ -260,11 +259,11 @@ class: center, middle
 
 .rust-means[Rust means…]
 
-# High Level Code
+# A Powerful Type System
 
 ---
 
-# High Level Code: Mutexes
+# A Powerful Type System: Mutexes
 
 <table>
     <thead><tr><th width="50%" style="text-align: center">C++</th><th width="50%">Rust</th></tr></thead>
@@ -303,7 +302,7 @@ d.push(5);
 
 ---
 
-# High Level Code: Page Table Abstractions
+# A Powerful Type System: Page Table Abstractions
 
 From the `x86_64` crate:
 
@@ -328,7 +327,7 @@ impl PageSize for Size1GB {…} // “giant” 1GB page (only on some architectu
 ---
 count: false
 
-# High Level Code: Page Table Abstractions
+# A Powerful Type System: Page Table Abstractions
 
 From the `x86_64` crate:
 
@@ -354,7 +353,7 @@ impl PageSize for `Size1GB` {…} // “giant” 1GB page (only on some architec
 
 count: false
 
-# High Level Code: Page Table Abstractions
+# A Powerful Type System: Page Table Abstractions
 
 From the `x86_64` crate:
 
@@ -378,7 +377,7 @@ impl PageSize for Size1GB {…} // “giant” 1GB page (only on some architectu
 
 ---
 
-# High Level Code
+# A Powerful Type System
 
 Allows to:
 
@@ -554,8 +553,8 @@ fn parse_date(s: &str) -> Option<(u32, u32, u32)> {
 proptest! {
     #[test]
     fn parse_date(`y in 0u32..10000`, `m in 1u32..13`, `d in 1u32..32`) {
-        let (y2, m2, d2) = parse_date(
-            &format!("{:04}-{:02}-{:02}", y, m, d)).unwrap();
+        let date_str = format!("{:04}-{:02}-{:02}", y, m, d);
+        let (y2, m2, d2) = parse_date(&date_str).unwrap();
         prop_assert_eq!((y, m, d), (y2, m2, d2));
     }
 }
@@ -1019,7 +1018,7 @@ Rust means:
 
 - **Memory Safety**.grey[ &nbsp;&nbsp;&nbsp;no overflows, no invalid pointers, no data races]
 - **Encapsulating Unsafety**.grey[ &nbsp;&nbsp;&nbsp;creating safe interfaces]
-- **High Level Code**.grey[ &nbsp;&nbsp;&nbsp;make misuse impossible]
+- **A Powerful Type System**.grey[ &nbsp;&nbsp;&nbsp;make misuse impossible]
 
 
 - **Easy Dependency Management**.grey[ &nbsp;&nbsp;&nbsp;cargo, crates.io]
