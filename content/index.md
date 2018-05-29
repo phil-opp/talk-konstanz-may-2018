@@ -723,11 +723,11 @@ trait Future {
 
 enum Async<T> {
     Ready(T),
-    Pending,
+    NotReady,
 }
 ```
 
-- Instead of blocking, `Async::Pending` is returned
+- Instead of blocking, `Async::NotReady` is returned
 
 ---
 
@@ -908,8 +908,8 @@ async fn handle_request(request: Request) -> Result<Response> { `GenFuture`(|| {
     let future = get_user_from_database(request.user_id);
     let user = loop { match `future.poll()` {
         Ok(Async::Ready(u)) => break Ok(u),
-        Ok(Async::NotReady) => `yield`,
         Err(e) => break Err(e),
+        Ok(Async::NotReady) => `yield`,
     }}?;
     generate_response(user)
 })}
