@@ -216,6 +216,13 @@ class: center, middle
 # Encapsulating Unsafety
 
 - Not everything can be verified at compile time
+- Sometimes you need `unsafe` in a kernel
+    - Writing to the VGA text buffer at `0xb8000`
+    - Modifying CPU configuration registers
+    - Switching the address space (reloading `CR3`)
+--
+
+
 - Rust has `unsafe` blocks that allow to
     - Dereference raw pointers
     - Call `unsafe` functions
@@ -223,13 +230,8 @@ class: center, middle
     - Implement `unsafe` traits
 
 
-- Sometimes you need `unsafe` in a kernel
-    - Writing to the VGA text buffer at `0xb8000`
-    - Modifying CPU configuration registers
-    - Switching the address space (reloading `CR3`)
-
-
 - Goal: Provide safe abstractions that encapsulate unsafety
+    - Like hardware abstractions in an OS
 ---
 
 # Encapsulating Unsafety: Example
@@ -302,22 +304,17 @@ d.push(5);
 
 ---
 
-# A Powerful Type System: Page Table Abstractions
+# A Powerful Type System: Page Table Methods
 
-From the `x86_64` crate:
+Add a page table mapping:
 
 ```Rust
-pub trait Mapper<S: PageSize> {
-    fn map_to<A>(
-        &mut self,
-        page: Page<S>,              // map this page
-        frame: PhysFrame<S>,        // to this frame
-        flags: PageTableFlags,
-        frame_allocator: &mut A,    // we might need frames for new page tables
-    )
-    where
-        A: FnMut() -> PhysFrame<Size4KB>;
-}
+fn map_to<S: PageSize>(
+    &mut PageTable,
+    page: Page<S>,              // map this page
+    frame: PhysFrame<S>,        // to this frame
+    flags: PageTableFlags,
+) {…}
 
 impl PageSize for Size4KB {…} // standard page
 impl PageSize for Size2MB {…} // “huge” 2MB page
@@ -327,53 +324,26 @@ impl PageSize for Size1GB {…} // “giant” 1GB page (only on some architectu
 ---
 count: false
 
-# A Powerful Type System: Page Table Abstractions
+# A Powerful Type System: Page Table Methods
 
-From the `x86_64` crate:
+Add a page table mapping:
 
 ```Rust
-pub trait Mapper<`S: PageSize`> {
-    fn map_to<A>(
-        &mut self,
-        page: Page<`S`>,              // map this page
-        frame: PhysFrame<`S`>,        // to this frame
-        flags: PageTableFlags,
-        frame_allocator: &mut A,    // we might need frames for new page tables
-    )
-    where
-        A: FnMut() -> PhysFrame<Size4KB>;
-}
+fn map_to<`S: PageSize`>(
+    &mut PageTable,
+    page: Page<`S`>,              // map this page
+    frame: PhysFrame<`S`>,        // to this frame
+    flags: PageTableFlags,
+) {…}
 
 impl PageSize for `Size4KB` {…} // standard page
 impl PageSize for `Size2MB` {…} // “huge” 2MB page
 impl PageSize for `Size1GB` {…} // “giant” 1GB page (only on some architectures)
 ```
 
----
-
-count: false
-
-# A Powerful Type System: Page Table Abstractions
-
-From the `x86_64` crate:
-
-```Rust
-pub trait Mapper<S: PageSize> {
-    fn map_to<`A`>(
-        &mut self,
-        page: Page<S>,              // map this page
-        frame: PhysFrame<S>,        // to this frame
-        flags: PageTableFlags,
-        frame_allocator: `&mut A`,    // we might need frames for new page tables
-    )
-    where
-        `A: FnMut() -> PhysFrame<Size4KB>`;
-}
-
-impl PageSize for Size4KB {…} // standard page
-impl PageSize for Size2MB {…} // “huge” 2MB page
-impl PageSize for Size1GB {…} // “giant” 1GB page (only on some architectures)
-```
+- Generic over the page size
+.grey[    - 4KB, 2MB or 1GB]
+- Page and frame must have the same size
 
 ---
 
@@ -386,7 +356,6 @@ Allows to:
 - Represent contracts in code instead of documentation
 .grey[
 - Page size of page and frame parameters must match in `map_to`
-- Additional frames are needed (from any allocator)
 ]
 
 <div style="height:1rem"></div>
@@ -666,7 +635,7 @@ class: center, middle
 --
 - It works!
     - No inappropriate comments for “Writing an OS in Rust” so far
-    - Focused technical discussions, even on reddit
+    - Focused technical discussions
 
 --
 
@@ -1005,10 +974,9 @@ What if blocking was not allowed?
 - Stacks could be reused for different threads
 
 
-- Task-based instead of thread-based concurrency
 - Only a few stacks are needed for many, many futures
-
-An OS without blocking might be possible!
+- Task-based instead of thread-based concurrency
+    - Fine grained concurrency at the OS level
 
 ---
 
