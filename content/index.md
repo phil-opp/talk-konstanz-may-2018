@@ -142,7 +142,7 @@ class: center, middle
     - No dangling pointers
     - No data races
 - Guaranteed by Rust's ownership system
-.grey[- Violations are only possible using `unsafe`]
+    - At compile time
 
 --
 
@@ -203,12 +203,6 @@ However:
 - Far less debugging
     - No data races!
 - Refactoring is safe and painless
-
---
-
-<div style="height:1rem"></div>
-
-What about `unsafe`?
 
 ---
 
@@ -590,7 +584,7 @@ proptest! {
 In C:
 
 - First step is to build a **cross compiler**
-    - A `gcc` that compiles for your target system
+    - A `gcc` that compiles for a bare-metal target system
     - Lots of build dependencies
 - On Windows, you have to use **cygwin**
     - Required for using the GNU build tools <span class="grey">(e.g. `make`)</span>
@@ -612,8 +606,6 @@ In Rust:
 - Cross-platform, no C dependencies
 - Automatically downloads and compiles a bootloader
 - **bootloader**: A x86 bootloader written in Rust and inline assembly
-- **cargo-xbuild**: Automatically cross compile the `core` library
-.grey[    - Fork of `xargo`, which is in maintainance mode]
 
 **Goals**:
 
@@ -690,7 +682,6 @@ Most Rust Projects:
 
 - It doesn't matter where you come from
     - C, C++, Java, Python, JavaScript, …
-    - Academia, Industry, School, …
 - It's fine to ask questions
     - People are happy to help
 
@@ -728,7 +719,6 @@ class: center, middle
 In development: **Futures and async / await**
 
 - Simple and fast asynchronous code
-- Zero-cost abstractions
 
 
 - How does it work?
@@ -754,7 +744,6 @@ enum Async<T> {
 ```
 
 - Instead of blocking, `Async::Pending` is returned
-- Zero cost abstraction
 
 ---
 
@@ -994,8 +983,8 @@ What if blocking was not allowed?
 --
 
 - Threads would return futures instead of blocking
-- Stacks could be reused for different threads
 - Scheduler would schedule futures instead of threads
+- Stacks could be reused for different threads
 
 
 - Task-based instead of thread-based concurrency
